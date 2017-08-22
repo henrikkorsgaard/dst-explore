@@ -1,8 +1,9 @@
 const http = require("http");
 const db = require("./database.js")
+const request = require("request");
 
-//getAllSubjects();
-
+//db.setupDatabase();
+//postSubject();
 getAllSubjects();
 
 function getAllSubjects(){
@@ -25,16 +26,39 @@ function getAllSubjects(){
     });
 }
 
-function iterateSubjects(subjectArray){
+function iterateSubjects(subjectArray, parent){
+    if(!parent){
+        parent.id = null,
+    }
+
     for(var i = 0; i<subjectArray.length; i++){
         var subject = subjectArray[i];
-         if(subject.hasSubjects){
-             iterateSubjects(subject.subjects);
-         }
+        var s = {
+            id: subject.id,
+            description:subject.description,
+            hasSubjects: subject.hasSubjects,
+            hasTables:false,
+            tables:[],
+            childSubjects:[],
+            parentSubject:parent.id
+        }
 
-         if(subject.hasSubjects && subject.hasOwnProperty("tables") && subject.tables.length !== 0){
-                console.log(subject)
-         }
+        if(subject.tables.length > 0 ){
+            s.hasTables = true;
+            for(var i = 0; i < subject.tables.length; i++){
+                s.tables.push(subject.tables[i].id);
+            }
+        }
+        if(subject.hasSubjects){
+            for(var i = 0; i < subject.subjects.length; i++){
+                s.childSubjects.push(subject[i].subjects.id);
+            }
+            iterateSubjects(subject.subjects, subject);
+        }
+
+        console.log(s)
+        //postSubject(s);
+
     }
 }
 
@@ -57,6 +81,18 @@ function get(path, callback){
     });
 }
 
-/*
-    Subjects_:
-*/
+function postSubject(subject, callback){
+    var data = JSON.stringify(subject);
+    request({
+        url:"http://localhost:3000/subject/1234",
+        json: true,
+        headers: {
+            "content-type": "application/json",
+        },
+        method: "POST",
+        body: data
+    }, (err, response, body)=>{
+        console.log(response)
+    });
+}
+function getInternalAPI(){}

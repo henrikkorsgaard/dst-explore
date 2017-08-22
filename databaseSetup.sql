@@ -1,3 +1,5 @@
+
+
 CREATE TABLE subject (
     id int primary key,
     active boolean,
